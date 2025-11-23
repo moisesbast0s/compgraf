@@ -190,7 +190,7 @@ static void desenhaRoda()
     glRotatef(-anguloRoda, 0.0f, 0.0f, 1.0f);
 
    
-    glColor3f(0.1f, 0.1f, 0.1f);
+    glColor3f(0.0f, 0.0f, 0.0f);
     glutSolidTorus(0.2f, 1.0f, 10, 30);
 
     glColor3f(0.5f, 0.5f, 0.5f);
@@ -214,9 +214,9 @@ void desenhaBicicleta()
     glPushMatrix();
 
  
-    glTranslatef(1.2f, 0.9f, -9.0f); 
+    glTranslatef(0.9f, 0.5f, -9.3f); 
 
-    glScalef(0.8f, 0.8f, 0.8f);
+    glScalef(0.5f, 0.5f, 0.5f);
 
    
     glRotatef(90.0f, 0.0f, 1.0f, 0.0f); 
