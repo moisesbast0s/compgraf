@@ -181,3 +181,97 @@ void desenhaPiramideDegraus()
 
     glPopMatrix();
 }
+
+static void desenhaRoda()
+{
+    glPushMatrix(); 
+
+   
+    glRotatef(-anguloRoda, 0.0f, 0.0f, 1.0f);
+
+   
+    glColor3f(0.1f, 0.1f, 0.1f);
+    glutSolidTorus(0.2f, 1.0f, 10, 30);
+
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glPushMatrix();
+    glScalef(1.8f, 0.2f, 0.2f);
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+
+    glPushMatrix();
+    glRotatef(90.0f, 0.0f, 0.0f, 1.0f); 
+    glScalef(1.8f, 0.2f, 0.2f);
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    glPopMatrix(); 
+}
+
+void desenhaBicicleta()
+{
+    glPushMatrix();
+
+ 
+    glTranslatef(1.2f, 0.9f, -9.0f); 
+
+    glScalef(0.8f, 0.8f, 0.8f);
+
+   
+    glRotatef(90.0f, 0.0f, 1.0f, 0.0f); 
+    glRotatef(-15.0f, 1.0f, 0.0f, 0.0f);
+
+ 
+    glColor3f(0.0f, 0.8f, 0.8f);
+
+    glPushMatrix();
+    glTranslatef(-1.5f, 0.0f, 0.0f);
+    desenhaRoda();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(1.5f, 0.0f, 0.0f);
+    desenhaRoda();
+    glPopMatrix();
+
+    glLineWidth(5.0f);
+    glBegin(GL_LINES);
+        
+        glVertex3f(-1.5f, 0.0f, 0.0f);
+        glVertex3f(1.0f, 1.5f, 0.0f);
+
+       
+        glVertex3f(-1.5f, 0.0f, 0.0f);
+        glVertex3f(-0.5f, 1.5f, 0.0f);
+
+     
+        glVertex3f(1.5f, 0.0f, 0.0f);
+        glVertex3f(1.0f, 1.5f, 0.0f);
+
+       
+        glVertex3f(-0.5f, 1.5f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+    glEnd();
+    glLineWidth(1.0f);
+
+   
+    glPushMatrix();
+    glColor3f(0.8f, 0.8f, 0.8f); 
+    glTranslatef(1.0f, 1.5f, 0.0f);
+    glScalef(0.2f, 0.2f, 1.5f);
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    
+    glPushMatrix();
+  
+    glColor3f(0.6f, 0.3f, 0.0f); 
+    
+    glTranslatef(-0.5f, 1.6f, 0.0f); 
+    glScalef(0.6f, 0.2f, 0.5f);      
+    glutSolidCube(1.0f);
+    glPopMatrix();
+
+    glPopMatrix();
+}

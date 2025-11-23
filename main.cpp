@@ -5,6 +5,7 @@
 
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
+float anguloRoda = 0.0f;
 
 float camX = 0.0f;
 float camY = 1.5f;
@@ -32,6 +33,7 @@ void display()
 
     desenhaChao();
     desenhaTorresEPiramides();
+    desenhaBicicleta();
     desenhaPiramideDegraus();
 
     glutSwapBuffers();
@@ -64,6 +66,11 @@ void timer(int v)
     anguloEsfera += 10.0f;
     if (anguloEsfera >= 360.0f)
         anguloEsfera -= 360.0f;
+
+
+    anguloRoda += 5.0f;
+    if (anguloRoda >= 360.0f)
+        anguloRoda -= 360.0f;
 
     atualizaMovimento();
 
