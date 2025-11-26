@@ -15,7 +15,8 @@ extern int centerX;
 extern int centerY;
 
 extern bool fullScreen;
-
+extern GLuint progLava;
+extern GLuint progLosango;
 extern bool ignoreWarp;
 extern bool firstMouse;
 
