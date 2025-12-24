@@ -1,138 +1,98 @@
 #include <GL/glut.h>
 #include <math.h>
+#include <cstdio> 
 #include "scene.h"
+#include "utils/maploader.h"
 
-void keyboard(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-    case 'w':
-    case 'W':
-        keyW = true;
-        break;
+extern MapLoader gMap;
 
-    case 's':
-    case 'S':
-        keyS = true;
-        break;
+#define BLOCO_TAMANHO 4.0f  
+// Raio grande para não "cortar" a parede com a câmera
+#define PLAYER_RAIO   1.0f   
+#define VELOCIDADE    0.15f
 
-    case 'a':
-    case 'A':
-        keyA = true;
-        break;
+bool verificaParede(float x, float z) {
+    // FÓRMULA CORRETA PARA CUBOS CENTRALIZADOS
+    // O cubo na posição 0 vai de -2 a +2.
+    // Somamos metade (2.0) para que -2 vire 0.
+    float offset = BLOCO_TAMANHO / 2.0f;
+    
+    // floor() garante funcionamento com números negativos
+    int gridX = (int)floor((x + offset) / BLOCO_TAMANHO);
+    int gridZ = (int)floor((z + offset) / BLOCO_TAMANHO);
 
-    case 'd':
-    case 'D':
-        keyD = true;
-        break;
+    char bloco = gMap.getBlock(gridX, gridZ);
 
-    case 27: // ESC
-        std::exit(0);
-        break;
+    // Debug: Se bugar, tire o // da linha abaixo
+    // printf("Pos(%.2f, %.2f) -> Grid[%d][%d] = '%c'\n", x, z, gridZ, gridX, bloco);
+
+    if (bloco == '1') return true; 
+    return false; 
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+        case 'w': case 'W': keyW = true; break;
+        case 's': case 'S': keyS = true; break;
+        case 'a': case 'A': keyA = true; break;
+        case 'd': case 'D': keyD = true; break;
+        case 27: exit(0); break;
     }
 }
 
-void keyboardUp(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-    case 'w':
-    case 'W':
-        keyW = false;
-        break;
-
-    case 's':
-    case 'S':
-        keyS = false;
-        break;
-
-    case 'a':
-    case 'A':
-        keyA = false;
-        break;
-
-    case 'd':
-    case 'D':
-        keyD = false;
-        break;
+void keyboardUp(unsigned char key, int x, int y) {
+    switch (key) {
+        case 'w': case 'W': keyW = false; break;
+        case 's': case 'S': keyS = false; break;
+        case 'a': case 'A': keyA = false; break;
+        case 'd': case 'D': keyD = false; break;
     }
-
-    if ((key == 13 || key == '\r') && (glutGetModifiers() & GLUT_ACTIVE_ALT))
-    {
+    if ((key == 13 || key == '\r') && (glutGetModifiers() & GLUT_ACTIVE_ALT)) {
         altFullScreen();
     }
 }
 
-void atualizaMovimento()
-{
-    float passo = 0.15f; // pode ajustar a velocidade aqui
-
+void atualizaMovimento() {
     float radYaw = yaw * M_PI / 180.0f;
     float dirX = std::sin(radYaw);
     float dirZ = -std::cos(radYaw);
-
-    // vetor perpendicular pra strafe
-    float strafeX = dirZ;
+    float strafeX = dirZ; 
     float strafeZ = -dirX;
 
-    if (keyW)
-    { // frente
-        camX += dirX * passo;
-        camZ += dirZ * passo;
-    }
-    if (keyS)
-    { // trás
-        camX -= dirX * passo;
-        camZ -= dirZ * passo;
-    }
-    if (keyA)
-    { // strafe esquerda
-        camX += strafeX * passo;
-        camZ += strafeZ * passo;
-    }
-    if (keyD)
-    { // strafe direita
-        camX -= strafeX * passo;
-        camZ -= strafeZ * passo;
+    float dx = 0.0f;
+    float dz = 0.0f;
+
+    if (keyW) { dx += dirX * VELOCIDADE;    dz += dirZ * VELOCIDADE; }
+    if (keyS) { dx -= dirX * VELOCIDADE;    dz -= dirZ * VELOCIDADE; }
+    if (keyA) { dx += strafeX * VELOCIDADE; dz += strafeZ * VELOCIDADE; }
+    if (keyD) { dx -= strafeX * VELOCIDADE; dz -= strafeZ * VELOCIDADE; }
+
+    if (dx == 0.0f && dz == 0.0f) return;
+
+    float proximoX = camX + dx;
+    float proximoZ = camZ + dz;
+
+    // Colisão rígida nos 4 cantos do jogador
+    bool colidiu = false;
+    if (verificaParede(proximoX + PLAYER_RAIO, proximoZ)) colidiu = true; 
+    if (verificaParede(proximoX - PLAYER_RAIO, proximoZ)) colidiu = true;
+    if (verificaParede(proximoX, proximoZ + PLAYER_RAIO)) colidiu = true; 
+    if (verificaParede(proximoX, proximoZ - PLAYER_RAIO)) colidiu = true; 
+
+    if (!colidiu) {
+        camX = proximoX;
+        camZ = proximoZ;
     }
 }
 
-void mouseMotion(int x, int y)
-{
-    // se o evento foi gerado pelo glutWarpPointer, ignorar
-    if (ignoreWarp)
-    {
-        ignoreWarp = false;
-        return;
-    }
-
-    // PRIMEIRA VEZ: só centraliza, sem aplicar rotação
-    if (firstMouse)
-    {
-        firstMouse = false;
-        ignoreWarp = true;
-        glutWarpPointer(centerX, centerY);
-        return;
-    }
-
-    int dx = x - centerX;
-    int dy = y - centerY;
-
-    float sens = 0.1f; // sensibilidade do mouse
-
-    yaw += dx * sens;   // horizontal
-    pitch -= dy * sens; // vertical (invertido pra sensação de FPS)
-
-    // limita o pitch pra não virar o pescoço ao contrário
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    // volta o mouse pro centro – isso vai gerar outro evento,
-    // por isso marcamos ignoreWarp = true.
-    ignoreWarp = true;
-    glutWarpPointer(centerX, centerY);
-
+void mouseMotion(int x, int y) {
+    if (ignoreWarp) { ignoreWarp = false; return; }
+    if (firstMouse) { firstMouse = false; ignoreWarp = true; glutWarpPointer(centerX, centerY); return; }
+    int dx = x - centerX; int dy = y - centerY;
+    float sens = 0.1f;
+    yaw += dx * sens; pitch -= dy * sens;
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
+    ignoreWarp = true; glutWarpPointer(centerX, centerY);
     glutPostRedisplay();
 }

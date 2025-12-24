@@ -10,7 +10,7 @@
 #include "drawlevel.h"
 #include "utils/levelmetrics.h"
 
-static MapLoader gMap;
+MapLoader gMap; // Agora ela é pública para todo o projeto
 
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
@@ -143,6 +143,8 @@ int main(int argc, char **argv)
     gMap.load("maps/map1.txt");
     LevelMetrics m = LevelMetrics::fromMap(gMap, 4.0f); 
     m.spawnPos(gMap, camX, camZ);
+    camX = 6.0f; 
+    camZ = 6.0f;
     camY = 1.5f;
 
     glutMainLoop();

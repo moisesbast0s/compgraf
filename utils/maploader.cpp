@@ -2,43 +2,40 @@
 #include <fstream>
 #include <iostream>
 
+// ... (Mantenha o método load existente aqui) ...
+// Se não tiver o load aqui, avise que eu mando, mas vou focar na novidade:
+
 bool MapLoader::load(const char* filename) {
+    // ... sua implementação atual de leitura de arquivo ...
+    // Vou assumir que ela preenche mapData, width e height corretamente.
+    // Abaixo está um esqueleto caso precise, senão mantenha o seu.
     std::ifstream file(filename);
-
-    if (!file.is_open()) {
-        std::cerr << "ERRO CRITICO: Nao foi possivel abrir o arquivo " << filename << std::endl;
-        return false;
-    }
-
+    if (!file.is_open()) return false;
     std::string line;
     mapData.clear();
-    height = 0;
-    width = 0;
-
     while (std::getline(file, line)) {
-
-        // remove \r se o arquivo vier do Windows
-        if (!line.empty() && line.back() == '\r')
-            line.pop_back();
-
-        // ignora linhas vazias ou comentários
-        if (line.empty() || line[0] == '#')
-            continue;
-
-        // detecta spawn '9'
-        for (int x = 0; x < (int)line.size(); x++) {
-            if (line[x] == '9') {
-                playerStartX = (float)x;
-                playerStartZ = (float)height;
-                line[x] = '0';
-            }
-        }
-
         mapData.push_back(line);
-        if ((int)line.size() > width) width = (int)line.size();
-        height++;
+    }
+    if (!mapData.empty()) {
+        height = mapData.size();
+        width = mapData[0].size();
+    }
+    return true;
+}
+
+// A IMPLEMENTAÇÃO NOVA
+char MapLoader::getBlock(int x, int z) const {
+    // 1. Verificação de Limites (Bounds Checking)
+    // Se a coordenada estiver fora do mapa, retornamos '1' (Parede) para bloquear.
+    if (z < 0 || z >= height || x < 0 || x >= width) {
+        return '1'; 
     }
 
-    file.close();
-    return (height > 0 && width > 0);
+    // 2. Acesso Direto: mapData[linha/z][coluna/x]
+    // Proteção extra: verifica se a linha tem o tamanho certo
+    if (x >= mapData[z].size()) {
+        return '1';
+    }
+
+    return mapData[z][x];
 }

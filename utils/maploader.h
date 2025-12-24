@@ -8,6 +8,11 @@ class MapLoader {
 public:
     bool load(const char* filename);
 
+    // --- NOVO MÉTODO PARA A AULA DE FÍSICA ---
+    // Retorna o caractere na posição (x, z). Ex: '1' se for parede.
+    char getBlock(int x, int z) const;
+    // -----------------------------------------
+
     const std::vector<std::string>& data() const { return mapData; }
 
     int getWidth() const { return width; }
