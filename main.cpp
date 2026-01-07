@@ -1,103 +1,29 @@
+#include <GL/glew.h>
 #include <GL/glut.h>
-#include <math.h>
-#include "scene.h"
-#include "input.h"
+#include <cstdio>
 
-float anguloPiramide = 0.0f;
-float anguloEsfera = 0.0f;
-float anguloRoda = 0.0f;
+#include "core/app.h"
+#include "core/window.h"
+#include "core/game.h"
 
-float camX = 0.0f;
-float camY = 1.5f;
-float camZ = 25.0f;
-float yaw = 0.0f;
-float pitch = 0.0f;
-
-void display()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    float radYaw = yaw * M_PI / 180.0f;
-    float radPitch = pitch * M_PI / 180.0f;
-
-    float dirX = cosf(radPitch) * sinf(radYaw);
-    float dirY = sinf(radPitch);
-    float dirZ = -cosf(radPitch) * cosf(radYaw);
-
-    gluLookAt(
-        camX, camY, camZ,
-        camX + dirX, camY + dirY, camZ + dirZ,
-        0.0f, 1.0f, 0.0f);
-
-    desenhaChao();
-    desenhaTorresEPiramides();
-    desenhaBicicleta();
-    desenhaPiramideDegraus();
-
-    glutSwapBuffers();
-}
-
-void reshape(int w, int h)
-{
-    if (h == 0)
-        h = 1;
-    float a = (float)w / (float)h;
-
-    glViewport(0, 0, w, h);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(60.0f, a, 1.0f, 100.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-
-    // informa ao módulo de input onde é o centro da janela
-    atualizaCentroJanela(w, h);
-}
-
-void timer(int v)
-{
-    anguloPiramide += 1.5f;
-    if (anguloPiramide >= 360.0f)
-        anguloPiramide -= 360.0f;
-
-    anguloEsfera += 10.0f;
-    if (anguloEsfera >= 360.0f)
-        anguloEsfera -= 360.0f;
-
-
-    anguloRoda += 5.0f;
-    if (anguloRoda >= 360.0f)
-        anguloRoda -= 360.0f;
-
-    atualizaMovimento();
-
-    glutPostRedisplay();
-    glutTimerFunc(16, timer, 0); // ~60 FPS
-}
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
-    glutInitWindowSize(1920, 1080);
+    glutInitWindowSize(janelaW, janelaH);
     glutCreateWindow("Um dia vai ser DOOM");
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
+    {
+        std::printf("Erro GLEW: %s\n", glewGetErrorString(err));
+        return 1;
+    }
 
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutKeyboardUpFunc(keyboardUp);
-    glutPassiveMotionFunc(mouseMotion);
-    
-    glutSetCursor(GLUT_CURSOR_NONE); // esconde o cursor
+    appInit();
 
-    glutTimerFunc(0, timer, 0);
+    if (!gameInit("maps/map1.txt"))
+        return 1;
 
     glutMainLoop();
     return 0;
